@@ -250,7 +250,7 @@ cells.append(code(
 "cell-fi"))
 
 nb["cells"] = cells
-path = "c:/Users/USER/OneDrive/바탕 화면/새 폴더/모델링/model_final_merged.ipynb"
+path = r"kwon.donggeun\모델링\model_final_merged.ipynb"
 with open(path, "w", encoding="utf-8") as f:
     json.dump(nb, f, ensure_ascii=False, indent=1)
 print("저장 완료:", path)
