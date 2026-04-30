@@ -30,7 +30,7 @@ SEARCH_URL  = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchM
 DETAIL_URL  = "http://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json"
 
 DATA_DIR      = Path("../data")
-MOVIE_MASTER  = DATA_DIR / "Movie_Master.csv"
+MOVIE_MASTER  = Path("../../_data/01_raw/Movie_Master.csv")
 PROGRESS_FILE = DATA_DIR / "kobis_progress.json"
 OUTPUT_FILE   = DATA_DIR / "Movie_Master_kobis.csv"
 

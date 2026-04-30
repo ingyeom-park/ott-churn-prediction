@@ -16,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-BASE = Path(__file__).parent.parent  # 대쉬보드/ 한 단계 위 (새 폴더/)
+BASE = Path(__file__).parent.parent  # 대쉬보드/ 한 단계 위 (kwon.donggeun/)
 
 # ─── 폰트 설정 ────────────────────────────────────────────────
 @st.cache_resource
@@ -150,15 +150,15 @@ if page == "🏠 홈":
         st.subheader("📁 주요 파일")
         st.markdown("""
 ```
-새 폴더/
-├── app.py                       ← 이 대시보드
+kwon.donggeun/
+├── 대쉬보드/app.py              ← 이 대시보드
 ├── data/
-│   ├── Membership_processing.csv  (17,810행, 29컬럼)
+│   ├── Membership_processing.csv  (29컬럼)
 │   └── Membership_v2.csv          (53 피처)
 ├── 모델링/
 │   ├── model_churn.ipynb          (메인 모델링)
-│   └── model_v3.ipynb             (LGB/CatBoost/HistGB)
-├── 다중공선성_v3.ipynb
+│   └── model_final_merged.ipynb   (CatBoost Optuna)
+├── 모델링/다중공선성_v3.ipynb
 └── EDA/
     └── eda_report.html
 ```
