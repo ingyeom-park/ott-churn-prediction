@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>SKAX OTT 전체 EDA 분석 보고서</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;background:#f4f6f9;color:#2d3748;font-size:14px}
+.hdr{background:linear-gradient(135deg,#1a365d,#2b6cb0);color:white;padding:40px 48px}
+.hdr h1{font-size:28px;font-weight:700;margin-bottom:8px}
+.hdr p{font-size:14px;opacity:.85;line-height:1.6}
+.wrap{max-width:1150px;margin:32px auto;padding:0 24px}
+.sec{margin-bottom:40px}
+.stitle{font-size:18px;font-weight:700;color:#1a365d;border-left:4px solid #2b6cb0;padding-left:12px;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.substitle{font-size:14px;font-weight:700;color:#2b6cb0;padding-left:8px;border-left:3px solid #90cdf4;margin:20px 0 12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.card{background:white;border-radius:10px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.kpi{text-align:center}
+.kpi .lbl{font-size:11px;color:#718096;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.kpi .val{font-size:28px;font-weight:700;color:#2b6cb0}
+.kpi .sub{font-size:12px;color:#a0aec0;margin-top:4px}
+.red .val{color:#e53e3e}
+.green .val{color:#38a169}
+.orange .val{color:#d69e2e}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#ebf4ff;color:#1a365d;padding:9px 12px;text-align:left;font-weight:600}
+td{padding:8px 12px;border-bottom:1px solid #e2e8f0}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f7fafc}
+.b{display:inline-block;padding:2px 9px;border-radius:12px;font-size:12px;font-weight:600}
+.bb{background:#ebf4ff;color:#2b6cb0}
+.br{background:#fff5f5;color:#e53e3e}
+.bg{background:#f0fff4;color:#38a169}
+.bx{background:#f7fafc;color:#718096}
+.by{background:#fffbeb;color:#d69e2e}
+.box{background:#fffbeb;border:1px solid #f6ad55;border-radius:8px;padding:14px 18px;font-size:13px;line-height:1.8;margin-top:14px}
+.box-blue{background:#ebf8ff;border:1px solid #90cdf4;border-radius:8px;padding:14px 18px;font-size:13px;line-height:1.8;margin-top:14px}
+.box-red{background:#fff5f5;border:1px solid #feb2b2;border-radius:8px;padding:14px 18px;font-size:13px;line-height:1.8;margin-top:14px}
+.ins{list-style:none}
+.ins li{padding:7px 0;border-bottom:1px solid #e2e8f0;font-size:13px;line-height:1.6}
+.ins li:last-child{border-bottom:none}
+.ins li::before{content:"→ ";color:#2b6cb0;font-weight:700}
+.sp{display:inline-flex;align-items:center;justify-content:center;background:#2b6cb0;color:white;border-radius:50%;width:24px;height:24px;font-size:12px;font-weight:700;flex-shrink:0}
+.bar-bg{background:#e2e8f0;border-radius:4px;height:10px;margin:6px 0}
+.bar-fill{height:10px;border-radius:4px}
+.divider{border:none;border-top:2px solid #e2e8f0;margin:32px 0}
+.ft{text-align:center;padding:24px;color:#a0aec0;font-size:13px}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;margin-right:4px}
+.funnel{display:flex;align-items:stretch;gap:0}
+.funnel-item{flex:1;text-align:center;padding:16px 8px;position:relative}
+.funnel-item:not(:last-child)::after{content:"▶";position:absolute;right:-10px;top:50%;transform:translateY(-50%);color:#a0aec0;font-size:16px;z-index:1}
+.funnel-num{font-size:22px;font-weight:700;margin-bottom:4px}
+.funnel-lbl{font-size:11px;color:#718096}
+.funnel-pct{font-size:12px;font-weight:600;margin-top:4px}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>SKAX OTT 전체 EDA 분석 보고서</h1>
+  <p>분석 테이블: Membership / View_History / Movie_Master / User_Mapping &nbsp;|&nbsp; 데이터 기간: 2021.03<br>
+  분석 범위: 데이터 현황 · 시청 행동 · 콘텐츠 · 이탈 분석 · 프로모션 효과 · RFM 세그멘테이션</p>
+</div>
+
+<div class="wrap">
+
+<!-- 1. 데이터 개요 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">1</span>데이터 개요</div>
+  <div class="g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="lbl">Membership</div><div class="val">18,183</div><div class="sub">구독 유저 레코드</div></div>
+    <div class="card kpi"><div class="lbl">View_History</div><div class="val">106,205</div><div class="sub">시청 세션 기록</div></div>
+    <div class="card kpi"><div class="lbl">Movie_Master</div><div class="val">5,196</div><div class="sub">등록 영화 수</div></div>
+    <div class="card kpi"><div class="lbl">테이블 매핑률</div><div class="val green" style="color:#38a169">100%</div><div class="sub">Membership ↔ User_Mapping</div></div>
+  </div>
+  <div class="g2">
+    <div class="card">
+      <div class="substitle" style="margin-top:0">테이블별 주요 컬럼</div>
+      <table>
+        <tr><th>테이블</th><th>주요 컬럼</th><th>특이사항</th></tr>
+        <tr><td>Membership</td><td>user_no, product_cd, amount, reg_date, end_date, gender, age, payment_device</td><td>이탈 타깃 변수 원천</td></tr>
+        <tr><td>View_History</td><td>USER_ID, MOVIE_ID, WATCH_DAY, DURATION, WATCH_SEQ</td><td>시청 행동 피처 원천</td></tr>
+        <tr><td>Movie_Master</td><td>MOVIE_ID, TITLE, RELEASE_MONTH</td><td>콘텐츠 메타</td></tr>
+        <tr><td>User_Mapping</td><td>uid(=user_no) ↔ USER_ID</td><td>테이블 연결 키</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div class="substitle" style="margin-top:0">중복 & 결측 요약</div>
+      <table>
+        <tr><th>항목</th><th>내용</th><th>처리</th></tr>
+        <tr><td>Membership 중복</td><td>user_no 기준 338건</td><td>reg_date 최신 유지</td></tr>
+        <tr><td>User_Mapping 중복</td><td>uid 기준 소수</td><td>USER_ID 최대값 유지</td></tr>
+        <tr><td>gender / age NaN</td><td>164건 동일 행</td><td>gender→'N', age 모델링 시 처리</td></tr>
+        <tr><td>promotion_yn NaN</td><td>8,980건</td><td>NaN→'N' (미참여)</td></tr>
+        <tr><td>is_churn_prevented NaN</td><td>14,926건</td><td>NaN→'N' (미대상)</td></tr>
+        <tr><td>age 이상치</td><td>age&lt;10 or ≥100 → 8건</td><td>행 삭제</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- 2. 이탈 현황 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">2</span>이탈 현황 요약</div>
+  <div class="g4" style="margin-bottom:16px">
+    <div class="card kpi red"><div class="lbl">전체 이탈률</div><div class="val">34.4%</div><div class="sub">6,252명 이탈</div></div>
+    <div class="card kpi green"><div class="lbl">재구매율</div><div class="val">65.6%</div><div class="sub">11,931명 재구매</div></div>
+    <div class="card kpi orange"><div class="lbl">이탈 방지 조치 대상</div><div class="val">3,257</div><div class="sub">전체의 17.9%</div></div>
+    <div class="card kpi"><div class="lbl">구독 기간 중앙값</div><div class="val">31일</div><div class="sub">min 0일 / max 32일</div></div>
+  </div>
+
+  <div class="substitle">세그먼트별 이탈률</div>
+  <div class="g2">
+    <div class="card">
+      <table>
+        <tr><th>상품 구분</th><th>이탈률 추정</th><th>특이사항</th></tr>
+        <tr><td>저가 / 무료 체험 플랜</td><td><span class="b br">높음</span></td><td>amount_krw 중앙값 100원 → 이탈 집중</td></tr>
+        <tr><td>프리미엄 플랜</td><td><span class="b bg">낮음</span></td><td>amount_krw 중앙값 7,900원 → 재구매 집중</td></tr>
+        <tr><td>프로모션 참여</td><td><span class="b br">38%</span></td><td>비프로모션(31%) 대비 +7%p 높음</td></tr>
+        <tr><td>비프로모션</td><td><span class="b bg">31%</span></td><td>평균 결제 10,297원 (유료 고객)</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:12px;font-size:13px">연령대별 시청 시간 (평균 DURATION)</div>
+      <table>
+        <tr><th>연령대</th><th>평균 시청 시간</th><th>비고</th></tr>
+        <tr><td>~19세</td><td><strong>47.0분</strong></td><td><span class="b bb">가장 높음</span></td></tr>
+        <tr><td>20대</td><td>45.0분</td><td>—</td></tr>
+        <tr><td>50대</td><td>44.9분</td><td>—</td></tr>
+        <tr><td>40대</td><td>44.4분</td><td>—</td></tr>
+        <tr><td>60+</td><td>44.3분</td><td>—</td></tr>
+        <tr><td>30대</td><td><strong>43.7분</strong></td><td><span class="b bx">가장 낮음</span></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="box" style="margin-top:16px">
+    <strong>핵심 발견</strong><br>
+    구독 기간(sub_days)은 이탈·재구매 모두 중앙값 31일로 동일 → <strong>구독 기간 자체는 이탈 구분력 낮음</strong><br>
+    이탈 유저와 재구매 유저의 시청 횟수·시간 중앙값이 거의 같음 → <strong>시청량보다 결제 금액(amount_krw)이 훨씬 강한 이탈 예측 변수</strong>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- 3. 시청 행동 EDA -->
+<div class="sec">
+  <div class="stitle"><span class="sp">3</span>시청 행동 분석 (View_History)</div>
+  <div class="g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="lbl">시청 기록 보유 유저</div><div class="val">14,892</div><div class="sub">전체 Membership의 ~83%</div></div>
+    <div class="card kpi"><div class="lbl">1인당 평균 시청 횟수</div><div class="val">7.1회</div><div class="sub">중앙값 6회</div></div>
+    <div class="card kpi"><div class="lbl">평균 시청 시간</div><div class="val">44.5분</div><div class="sub">중앙값 24분 (우편향)</div></div>
+    <div class="card kpi"><div class="lbl">1인당 총 시청</div><div class="val">317분</div><div class="sub">평균 누적 시청 시간</div></div>
+  </div>
+
+  <div class="substitle">이탈 vs 재구매 — 시청 행동 비교 (중앙값)</div>
+  <div class="card" style="margin-bottom:16px">
+    <table>
+      <tr><th>구분</th><th>총 시청 횟수</th><th>총 시청 시간(분)</th><th>시청 고유 영화 수</th><th>시청 활동 일수</th></tr>
+      <tr>
+        <td><span class="b br">이탈 (1)</span></td>
+        <td>6회</td><td>225.5분</td><td>4편</td><td>3일</td>
+      </tr>
+      <tr>
+        <td><span class="b bg">재구매 (0)</span></td>
+        <td>6회</td><td>225.0분</td><td>4편</td><td>3일</td>
+      </tr>
+    </table>
+    <div class="box-red">
+      이탈·재구매 그룹 간 시청 지표 차이가 거의 없음 → 단순 시청량은 이탈 예측에 제한적<br>
+      <strong>결제 금액(amount_krw), 상품 유형, 프로모션 여부</strong>가 더 중요한 변수임을 시사
+    </div>
+  </div>
+
+  <div class="substitle">요일 / 시간대 분석</div>
+  <div class="g2">
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:12px;font-size:13px">요일별 1인당 평균 시청 (건수)</div>
+      <table>
+        <tr><th>요일</th><th>1인당 시청 건수</th><th>수준</th></tr>
+        <tr><td>토요일</td><td><strong>1.53회</strong></td><td><span class="b bb">최고</span></td></tr>
+        <tr><td>일요일</td><td>1.47회</td><td><span class="b bb">높음</span></td></tr>
+        <tr><td>금요일</td><td>0.89회</td><td>—</td></tr>
+        <tr><td>월요일</td><td>0.84회</td><td>—</td></tr>
+        <tr><td>화요일</td><td>0.81회</td><td>—</td></tr>
+        <tr><td>수/목요일</td><td>0.79회</td><td><span class="b bx">최저</span></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:12px;font-size:13px">주말 vs 평일 비교</div>
+      <table>
+        <tr><th>구분</th><th>1인당 1일 시청 건수</th><th>1인당 1일 시청 시간</th></tr>
+        <tr><td><span class="b bb">주말</span></td><td><strong>0.30회</strong></td><td><strong>13.6분</strong></td></tr>
+        <tr><td><span class="b bx">평일</span></td><td>0.16회</td><td>7.0분</td></tr>
+        <tr><td colspan="3" style="font-size:12px;color:#718096">주말 시청 건수 +88%, 시청 시간 +94% (평일 대비)</td></tr>
+      </table>
+      <div class="box-blue" style="margin-top:12px">
+        주말 집중도 뚜렷 → <strong>주말 신작 공개, 주말 푸시 알림</strong> 전략 유효<br>
+        평일 저녁(금요일) 소폭 반등 → 주말 진입 전 예열 효과
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- 4. 콘텐츠 분석 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">4</span>콘텐츠 분석</div>
+
+  <div class="substitle">완주율 (Completion Rate) 분석</div>
+  <div class="g3" style="margin-bottom:16px">
+    <div class="card kpi red"><div class="lbl">전체 평균 완주율</div><div class="val">29.9%</div><div class="sub">대부분 30% 전후 종료</div></div>
+    <div class="card kpi"><div class="lbl">완주율 50% 이상 세션</div><div class="val">27.3%</div><div class="sub">전체 세션 중</div></div>
+    <div class="card kpi"><div class="lbl">완주율 90% 이상 세션</div><div class="val">7.8%</div><div class="sub">실질 완주 비율</div></div>
+  </div>
+
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:12px;font-size:13px">완주율 낮은 콘텐츠 Top 10 (이탈 위험 콘텐츠)</div>
+      <table>
+        <tr><th>순위</th><th>영화 제목</th><th>평균 완주율</th><th>시청 건수</th></tr>
+        <tr><td>1</td><td>파이널포트레이트</td><td><span class="b br">2.5%</span></td><td>115건</td></tr>
+        <tr><td>2</td><td>송가인더드라마</td><td><span class="b br">4.1%</span></td><td>36건</td></tr>
+        <tr><td>3</td><td>더블패티</td><td><span class="b br">5.0%</span></td><td>38건</td></tr>
+        <tr><td>4</td><td>피노키오(2019)</td><td><span class="b br">5.0%</span></td><td>25건</td></tr>
+        <tr><td>5</td><td>오버더펜스</td><td><span class="b br">6.6%</span></td><td>19건</td></tr>
+        <tr><td>6</td><td>베를린천사의시</td><td><span class="b br">6.6%</span></td><td>73건</td></tr>
+        <tr><td>7</td><td>만델라이펙트</td><td><span class="b br">6.6%</span></td><td>21건</td></tr>
+        <tr><td>8</td><td>고백(2020)</td><td><span class="b br">6.8%</span></td><td>100건</td></tr>
+        <tr><td>9</td><td>케이크메이커</td><td><span class="b by">7.1%</span></td><td>113건</td></tr>
+        <tr><td>10</td><td>분노</td><td><span class="b by">7.3%</span></td><td>109건</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:12px;font-size:13px">콘텐츠 파레토 법칙</div>
+      <div style="background:#f7fafc;border-radius:8px;padding:20px;text-align:center;margin-bottom:12px">
+        <div style="font-size:36px;font-weight:700;color:#2b6cb0">12.2%</div>
+        <div style="font-size:13px;color:#718096;margin-top:4px">의 영화가 전체 시청의 <strong>80%</strong> 담당</div>
+      </div>
+      <div class="box-blue">
+        <strong>집중도 높은 소수 콘텐츠 의존 구조</strong><br>
+        전체 5,196편 중 약 634편이 핵심 트래픽 생성<br>
+        → 상위 콘텐츠 라이센스 유지, 신규 인기작 빠른 수급이 이탈 방지 핵심 수단
+      </div>
+      <div class="box" style="margin-top:12px">
+        <strong>완주율 낮은 콘텐츠 전략</strong><br>
+        완주율 10% 미만 콘텐츠는 썸네일·설명 개선 또는 큐레이션 하향 조정 검토<br>
+        초반 이탈이 많은 콘텐츠 → 도입부 개편 또는 추천 알고리즘에서 비중 축소
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- 5. 이탈 방지 효과 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">5</span>이탈 방지 조치 효과 분석</div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div style="font-weight:600;margin-bottom:16px;font-size:13px">이탈 방지 퍼널 (전체 구독자 기준)</div>
+    <div class="funnel">
+      <div class="funnel-item" style="background:#ebf8ff;border-radius:8px">
+        <div class="funnel-num" style="color:#2b6cb0">18,183</div>
+        <div class="funnel-lbl">전체 구독자</div>
+        <div class="funnel-pct">100%</div>
+      </div>
+      <div class="funnel-item" style="background:#fffbeb;border-radius:8px">
+        <div class="funnel-num" style="color:#d69e2e">3,257</div>
+        <div class="funnel-lbl">이탈 방지 조치 대상</div>
+        <div class="funnel-pct">17.9%</div>
+      </div>
+      <div class="funnel-item" style="background:#f0fff4;border-radius:8px">
+        <div class="funnel-num" style="color:#38a169">2,312</div>
+        <div class="funnel-lbl">재구매 성공</div>
+        <div class="funnel-pct" style="color:#38a169">71.0%</div>
+      </div>
+      <div class="funnel-item" style="background:#fff5f5;border-radius:8px">
+        <div class="funnel-num" style="color:#e53e3e">945</div>
+        <div class="funnel-lbl">이탈 (조치 실패)</div>
+        <div class="funnel-pct" style="color:#e53e3e">29.0%</div>
+      </div>
+    </div>
+    <div class="box" style="margin-top:16px">
+      <strong>이탈 방지 조치 성공률 71.0%</strong> — 조치를 받은 유저 10명 중 7명은 재구매로 전환됨<br>
+      전체 구독자 대비 조치 대상이 17.9%에 불과 → <strong>이탈 사전 감지 모델로 대상자 확대 시 추가 효과 기대</strong>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- 6. Cold Start -->
+<div class="sec">
+  <div class="stitle"><span class="sp">6</span>가입 직후 행동 (Cold Start) 분석</div>
+  <div class="g3" style="margin-bottom:16px">
+    <div class="card kpi green"><div class="lbl">7일 내 첫 시청 (활성화)</div><div class="val">59.4%</div><div class="sub">활성화 이탈률 34.1%</div></div>
+    <div class="card kpi red"><div class="lbl">7일 초과 / 미시청 (비활성화)</div><div class="val">40.6%</div><div class="sub">비활성화 이탈률 35.4%</div></div>
+    <div class="card kpi"><div class="lbl">활성화 vs 비활성화 이탈 차이</div><div class="val">1.3%p</div><div class="sub">통계적으로 유의미하지 않을 수 있음</div></div>
+  </div>
+  <div class="box-red">
+    <strong>Cold Start 활성화 여부의 이탈 예측력이 예상보다 낮음</strong><br>
+    활성화 유저 이탈률(34.1%) vs 비활성화 유저(35.4%) — 차이 1.3%p에 불과<br>
+    → 가입 직후 콘텐츠 소비보다 <strong>결제 금액 / 상품 유형</strong>이 이탈을 더 잘 설명함<br>
+    → 단, 초반 활성화는 장기 LTV 관점에서 여전히 중요한 선행 지표로 관리 필요
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- 7. 프로모션 효과 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">7</span>프로모션 효과 분석</div>
+  <div class="card" style="margin-bottom:16px">
+    <table>
+      <tr><th>구분</th><th>유저 수</th><th>재구매율</th><th>이탈률</th><th>이탈방지율</th><th>평균 구독기간</th><th>평균 결제금액</th></tr>
+      <tr>
+        <td><span class="b bx">비프로모션</span></td>
+        <td>8,980명</td>
+        <td><span class="b bg">69.4%</span></td>
+        <td><span class="b bg">31%</span></td>
+        <td>20.0%</td>
+        <td>29.9일</td>
+        <td style="font-weight:700;color:#2b6cb0">10,297원</td>
+      </tr>
+      <tr>
+        <td><span class="b bb">프로모션</span></td>
+        <td>9,203명</td>
+        <td><span class="b br">62.0%</span></td>
+        <td><span class="b br">38%</span></td>
+        <td>15.8%</td>
+        <td>30.7일</td>
+        <td style="font-weight:700;color:#e53e3e">100원</td>
+      </tr>
+    </table>
+    <div class="box-red" style="margin-top:12px">
+      <strong>프로모션 유저의 이탈률이 7%p 높음</strong><br>
+      평균 결제금액이 100원 → 무료 체험 / 초저가 프로모션 대상자가 대부분<br>
+      재구매 의향(WTP)이 낮은 유저를 대량 유입 → 이탈 집중<br>
+      <strong>제언:</strong> 프로모션 종료 후 정가 전환 유도 캠페인(리텐션 오퍼) 필수, 단순 가입 볼륨보다 유료 전환율 KPI 관리 권장
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- 8. RFM 세그멘테이션 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">8</span>RFM 세그멘테이션</div>
+  <div class="g5" style="margin-bottom:16px">
+    <div class="card kpi" style="border-top:3px solid gold">
+      <div class="lbl">최우수 (Champions)</div>
+      <div class="val" style="color:#d69e2e;font-size:22px">2,681명</div>
+      <div class="sub">이탈률 35.5%</div>
+    </div>
+    <div class="card kpi" style="border-top:3px solid steelblue">
+      <div class="lbl">충성 (Loyal)</div>
+      <div class="val" style="color:#2b6cb0;font-size:22px">4,203명</div>
+      <div class="sub">이탈률 35.3%</div>
+    </div>
+    <div class="card kpi" style="border-top:3px solid mediumseagreen">
+      <div class="lbl">잠재 (Potential)</div>
+      <div class="val" style="color:#38a169;font-size:22px">4,183명</div>
+      <div class="sub">이탈률 36.2%</div>
+    </div>
+    <div class="card kpi" style="border-top:3px solid orange">
+      <div class="lbl">위험 (At Risk)</div>
+      <div class="val" style="color:#d69e2e;font-size:22px">3,048명</div>
+      <div class="sub">이탈률 33.1%</div>
+    </div>
+    <div class="card kpi" style="border-top:3px solid tomato">
+      <div class="lbl">이탈 (Lost)</div>
+      <div class="val" style="color:#e53e3e;font-size:22px">777명</div>
+      <div class="sub">이탈률 28.0%</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:600;margin-bottom:12px;font-size:13px">RFM 기초 통계 (시청 기록 보유 14,892명 기준)</div>
+    <table>
+      <tr><th>지표</th><th>평균</th><th>중앙값</th><th>최솟값</th><th>최댓값</th></tr>
+      <tr><td>Recency (마지막 시청 후 경과일)</td><td>13.0일</td><td>13일</td><td>0일</td><td>35일</td></tr>
+      <tr><td>Frequency (총 시청 횟수)</td><td>7.1회</td><td>6회</td><td>1회</td><td>75회</td></tr>
+      <tr><td>Monetary (총 시청 시간)</td><td>317분</td><td>225분</td><td>1분</td><td>4,419분</td></tr>
+    </table>
+    <div class="box-red" style="margin-top:12px">
+      <strong>RFM 세그먼트별 이탈률 차이가 매우 작음 (28~36% 수준)</strong><br>
+      시청 행동(RFM) 기반 세그먼트만으로는 이탈 고위험군 식별 어려움<br>
+      → <strong>결제 금액 / 상품 코드 / 프로모션 여부를 결합한 복합 세그먼테이션</strong> 필요<br>
+      → 시청 RFM은 콘텐츠 추천·개인화 용도로 활용하는 것이 더 적합
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<!-- 9. 핵심 인사이트 & 제언 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">9</span>핵심 인사이트 & 비즈니스 제언</div>
+  <div class="g2">
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:14px;color:#e53e3e">⚠ 이탈 위험 신호</div>
+      <ul class="ins">
+        <li>결제 금액 100원 이하 (프로모션·무료 체험) → 이탈률 38%로 가장 위험</li>
+        <li>프로모션 종료 후 정가 전환 실패 유저가 대규모 이탈 발생</li>
+        <li>완주율 10% 미만 콘텐츠 다수 반복 시청 유저 → 콘텐츠 불만족 가능성</li>
+        <li>시청 기록 없는 유저 16.5% (2,945명) → 비활성 이탈 잠재 그룹</li>
+        <li>이탈 방지 조치 대상자 중 29%는 조치에도 이탈 → 고위험군 사전 식별 필요</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:14px;color:#38a169">✓ 비즈니스 제언</div>
+      <ul class="ins">
+        <li>프로모션 종료 D-7부터 정가 전환 리텐션 오퍼(할인 쿠폰 등) 선제 발송</li>
+        <li>가입 후 시청 기록 없는 유저에게 온보딩 콘텐츠 추천 푸시 자동화</li>
+        <li>상위 12.2% 핵심 콘텐츠 라이센스 안정적 확보 → 전체 트래픽의 80% 유지</li>
+        <li>주말 신작 공개 전략 및 금요일 저녁 예고 알림으로 주말 시청 극대화</li>
+        <li>이탈 예측 모델(amount_krw + product_cd + promo 결합) 구축으로 조치 대상 확대</li>
+        <li>완주율 낮은 콘텐츠 정기 모니터링 → 큐레이션 하향 또는 콘텐츠 개선 요청</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div>
+<div class="ft">SKAX OTT 전체 EDA 분석 보고서 &nbsp;|&nbsp; 데이터 기간 2021.03 &nbsp;|&nbsp; 분석 기준: 전체eda.ipynb</div>
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>SKAX 이탈예측 파생변수 정리</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Malgun Gothic', sans-serif; background: #f4f6f9; color: #2d3748; padding: 32px; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; color: #1a202c; }
+  .subtitle { font-size: 13px; color: #718096; margin-bottom: 32px; }
+  .section { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .section-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #e2e8f0; display: flex; align-items: center; gap: 8px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f7fafc; text-align: left; padding: 9px 12px; font-weight: 600; color: #4a5568; border-bottom: 1px solid #e2e8f0; }
+  td { padding: 9px 12px; border-bottom: 1px solid #f0f4f8; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f7fafc; }
+  .col-name { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 600; color: #2b6cb0; background: #ebf8ff; padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 10px; margin-right: 3px; }
+  .tag-new  { background: #c6f6d5; color: #276749; }
+  .tag-raw  { background: #e9d8fd; color: #553c9a; }
+  .tag-enc  { background: #feebc8; color: #744210; }
+  .tag-drop { background: #fed7d7; color: #822727; }
+  .section-target .section-title { color: #e53e3e; }
+  .section-member .section-title { color: #805ad5; }
+  .section-view   .section-title { color: #3182ce; }
+  .section-early  .section-title { color: #38a169; }
+  .section-rfm    .section-title { color: #d69e2e; }
+  .section-weekly .section-title { color: #e53e3e; }
+  .section-genre  .section-title { color: #319795; }
+  .summary { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .stat-card { background: #fff; border-radius: 10px; padding: 16px 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); text-align: center; flex: 1; min-width: 120px; }
+  .stat-num { font-size: 28px; font-weight: 700; color: #2b6cb0; }
+  .stat-label { font-size: 12px; color: #718096; margin-top: 2px; }
+  .note { font-size: 12px; color: #718096; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0; }
+</style>
+</head>
+<body>
+
+<h1>SKAX 이탈예측 — 파생변수 정리</h1>
+<p class="subtitle">06.이탈예측.ipynb · 08.가나.ipynb 기반 / features.csv 최종 컬럼 기준</p>
+
+<div class="summary">
+  <div class="stat-card"><div class="stat-num">51</div><div class="stat-label">최종 컬럼 수</div></div>
+  <div class="stat-card"><div class="stat-num">17,968</div><div class="stat-label">유저 수</div></div>
+  <div class="stat-card"><div class="stat-num">33.9%</div><div class="stat-label">이탈률</div></div>
+  <div class="stat-card"><div class="stat-num">5</div><div class="stat-label">피처 그룹</div></div>
+  <div class="stat-card"><div class="stat-num">14</div><div class="stat-label">장르 피처</div></div>
+</div>
+
+<!-- 타깃 변수 -->
+<div class="section section-target">
+  <div class="section-title">🎯 타깃 변수</div>
+  <table>
+    <tr><th style="width:160px">컬럼명</th><th style="width:100px">타입</th><th>설명</th><th>생성 방법</th></tr>
+    <tr>
+      <td><span class="col-name">is_churn</span></td>
+      <td>int (0/1)</td>
+      <td>이탈 여부. 1=이탈, 0=재구매</td>
+      <td><span class="tag tag-new">파생</span> repurchase가 NaN이면 1 (이탈), 값 있으면 0 (재구매)</td>
+    </tr>
+  </table>
+  <p class="note">⚠️ repurchase는 is_churn과 1:1 역관계 → 완전 리케이지. 모델 학습 시 제거 필수.</p>
+</div>
+
+<!-- 멤버십 피처 -->
+<div class="section section-member">
+  <div class="section-title">💳 멤버십 피처</div>
+  <table>
+    <tr><th style="width:160px">컬럼명</th><th style="width:100px">타입</th><th>설명</th><th>처리 방법</th></tr>
+    <tr>
+      <td><span class="col-name">product_cd</span></td>
+      <td>str</td>
+      <td>구독 상품 코드 (pk_xxxx)</td>
+      <td><span class="tag tag-raw">원본</span> 09.모델링에서 LabelEncoder</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">billing_method</span></td>
+      <td>int</td>
+      <td>결제 방식 코드</td>
+      <td><span class="tag tag-raw">원본</span></td>
+    </tr>
+    <tr>
+      <td><span class="col-name">amount_krw</span></td>
+      <td>float</td>
+      <td>결제 금액 (원화 환산). USD 결제자는 × 1100 변환 후 19,349원 상한 처리</td>
+      <td><span class="tag tag-new">파생</span> amount가 소수면 USD → ×1100 / 정수면 KRW 그대로</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">is_usd</span></td>
+      <td>int (0/1)</td>
+      <td>USD 결제 여부</td>
+      <td><span class="tag tag-new">파생</span> amount % 1 ≠ 0 이면 1</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">concurrent_streams</span></td>
+      <td>float</td>
+      <td>동시 접속 가능 스트림 수 (1/2/4)</td>
+      <td><span class="tag tag-raw">원본</span> 결측치 73건 → 가격대별 최빈값으로 대체</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">promotion_yn</span></td>
+      <td>int (0/1)</td>
+      <td>프로모션 적용 여부</td>
+      <td><span class="tag tag-enc">인코딩</span> O=1, N/NaN=0</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">is_churn_prevented</span></td>
+      <td>int (0/1)</td>
+      <td>이탈 방지 조치 시행 여부 (조치를 취한 것이지 이탈 막힌 것 아님)</td>
+      <td><span class="tag tag-enc">인코딩</span> O=1, N/NaN=0</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">payment_device</span></td>
+      <td>str</td>
+      <td>결제 기기 (android / ios / pc / lgtv / sstv / ott / smarttv / mobile)</td>
+      <td><span class="tag tag-raw">원본</span> 09.모델링에서 LabelEncoder</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">is_user_verified</span></td>
+      <td>int (0/1)</td>
+      <td>본인인증 여부</td>
+      <td><span class="tag tag-enc">인코딩</span> Y=1, N/NaN=0</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">gender</span></td>
+      <td>int (0/1)</td>
+      <td>성별. F=0, M=1</td>
+      <td><span class="tag tag-enc">인코딩</span> 미인증(N) → 인증 유저 F/M 비율로 랜덤 대체 후 0/1 인코딩</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">age</span></td>
+      <td>float</td>
+      <td>나이 (세). 10세 미만·100세 이상 제거</td>
+      <td><span class="tag tag-raw">원본</span> 결측치 155건 → 인증 유저 중앙값(30세)으로 대체</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">reg_hour</span></td>
+      <td>int</td>
+      <td>가입 시간 (0~23시)</td>
+      <td><span class="tag tag-raw">원본</span></td>
+    </tr>
+    <tr>
+      <td><span class="col-name">sub_days</span></td>
+      <td>int</td>
+      <td>구독 기간 (일). end_date - reg_date</td>
+      <td><span class="tag tag-new">파생</span> ⚠️ 이탈자는 sub_days 짧음 → 준-리케이지 가능성</td>
+    </tr>
+  </table>
+  <p class="note">🗑️ 제거 컬럼: amount (amount_krw로 대체), age_group (age로 대체), reg_date / end_date (sub_days 계산 후 불필요), user_no / uid / USER_ID (식별자)</p>
+</div>
+
+<!-- 시청 행동 피처 -->
+<div class="section section-view">
+  <div class="section-title">📺 시청 행동 피처</div>
+  <table>
+    <tr><th style="width:160px">컬럼명</th><th style="width:100px">타입</th><th>설명</th><th>생성 방법</th></tr>
+    <tr>
+      <td><span class="col-name">watch_count</span></td>
+      <td>float</td>
+      <td>총 시청 세션 수 (동일 영화 여러 번 포함)</td>
+      <td><span class="tag tag-new">파생</span> View_History 건수 집계</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">unique_movies</span></td>
+      <td>float</td>
+      <td>시청한 고유 영화 수</td>
+      <td><span class="tag tag-new">파생</span> MOVIE_ID nunique</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">active_days</span></td>
+      <td>float</td>
+      <td>시청한 날 수 (접속일 수)</td>
+      <td><span class="tag tag-new">파생</span> WATCH_DAY nunique</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">total_duration</span></td>
+      <td>float</td>
+      <td>총 시청 시간 (분)</td>
+      <td><span class="tag tag-new">파생</span> DURATION 합계</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">avg_duration</span></td>
+      <td>float</td>
+      <td>세션당 평균 시청 시간 (분)</td>
+      <td><span class="tag tag-new">파생</span> DURATION 평균</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">avg_completion</span></td>
+      <td>float (0~1)</td>
+      <td>영화별 평균 완주율 (1.0 = 끝까지 시청)</td>
+      <td><span class="tag tag-new">파생</span> 영화 길이 대비 시청 시간 비율, clip(1.0)</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">avg_rewatch_ratio</span></td>
+      <td>float (≥0)</td>
+      <td>평균 시청 배율 (1.0 초과 = 재시청 있음)</td>
+      <td><span class="tag tag-new">파생</span> 영화 길이 대비 시청 시간 비율, clip 없음</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">rewatch_count</span></td>
+      <td>float</td>
+      <td>재시청한 영화 수 (watch_ratio > 1.0인 영화 수)</td>
+      <td><span class="tag tag-new">파생</span></td>
+    </tr>
+    <tr>
+      <td><span class="col-name">watch_per_day</span></td>
+      <td>float</td>
+      <td>구독 1일당 시청 세션 수</td>
+      <td><span class="tag tag-new">파생</span> watch_count / sub_days (sub_days=0이면 1로 처리)</td>
+    </tr>
+  </table>
+  <p class="note">시청 기록 없는 유저(미시청) → 모든 시청 피처 0으로 처리</p>
+</div>
+
+<!-- 가입 초기 행동 -->
+<div class="section section-early">
+  <div class="section-title">🚀 가입 초기 행동 피처</div>
+  <table>
+    <tr><th style="width:160px">컬럼명</th><th style="width:100px">타입</th><th>설명</th><th>생성 방법</th></tr>
+    <tr>
+      <td><span class="col-name">days_to_first_watch</span></td>
+      <td>float</td>
+      <td>가입 후 첫 시청까지 걸린 일수. 미시청=-1</td>
+      <td><span class="tag tag-new">파생</span> 첫 WATCH_DAY - reg_date</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">cold_start</span></td>
+      <td>int (0/1)</td>
+      <td>가입 후 7일 이내 첫 시청 여부 (=초기 참여율)</td>
+      <td><span class="tag tag-new">파생</span> days_to_first_watch ≤ 7 이면 1</td>
+    </tr>
+  </table>
+</div>
+
+<!-- RFM -->
+<div class="section section-rfm">
+  <div class="section-title">📊 RFM 피처</div>
+  <table>
+    <tr><th style="width:160px">컬럼명</th><th style="width:100px">타입</th><th>설명</th><th>생성 방법</th></tr>
+    <tr>
+      <td><span class="col-name">recency_days</span></td>
+      <td>float</td>
+      <td>마지막 시청 후 경과 일수 (R). 미시청 유저=최대값+1</td>
+      <td><span class="tag tag-new">파생</span> 기준일(최대 WATCH_DAY) - 마지막 시청일</td>
+    </tr>
+  </table>
+  <p class="note">F(Frequency) = watch_count, M(Monetary) = amount_krw 로 대체 사용</p>
+</div>
+
+<!-- 주차별 리텐션 -->
+<div class="section section-weekly">
+  <div class="section-title">📅 주차별 시청 & 리텐션 피처</div>
+  <table>
+    <tr><th style="width:160px">컬럼명</th><th style="width:100px">타입</th><th>설명</th><th>생성 방법</th></tr>
+    <tr>
+      <td><span class="col-name">dur_w1</span></td>
+      <td>float</td>
+      <td>가입 후 1~7일 시청 시간 (분)</td>
+      <td><span class="tag tag-new">파생</span> 가입일 기준 days_since_reg 1~7일 DURATION 합계</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">dur_w2</span></td>
+      <td>float</td>
+      <td>가입 후 8~14일 시청 시간 (분)</td>
+      <td><span class="tag tag-new">파생</span> days_since_reg 8~14일 DURATION 합계</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">dur_w3</span></td>
+      <td>float</td>
+      <td>가입 후 15~21일 시청 시간 (분)</td>
+      <td><span class="tag tag-new">파생</span> days_since_reg 15~21일 DURATION 합계</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">retention_w2</span></td>
+      <td>int (0/1)</td>
+      <td>2주차 리텐션 (8~14일 사이 시청 여부)</td>
+      <td><span class="tag tag-new">파생</span> dur_w2 > 0 이면 1</td>
+    </tr>
+    <tr>
+      <td><span class="col-name">retention_w3</span></td>
+      <td>int (0/1)</td>
+      <td>3주차 리텐션 (15~21일 사이 시청 여부)</td>
+      <td><span class="tag tag-new">파생</span> dur_w3 > 0 이면 1</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 장르 피처 -->
+<div class="section section-genre">
+  <div class="section-title">🎬 장르 선호도 피처 (14개)</div>
+  <table>
+    <tr><th style="width:160px">컬럼명</th><th style="width:100px">타입</th><th>설명</th><th>생성 방법</th></tr>
+    <tr>
+      <td><span class="col-name">genre_드라마</span><br><span class="col-name">genre_액션</span><br><span class="col-name">genre_스릴러</span><br><span class="col-name">genre_코미디</span><br><span class="col-name">genre_로맨스</span><br><span class="col-name">genre_다큐멘터리</span><br><span class="col-name">genre_공포</span><br><span class="col-name">genre_범죄</span><br><span class="col-name">genre_SF</span><br><span class="col-name">genre_판타지</span><br><span class="col-name">genre_가족</span><br><span class="col-name">genre_애니메이션</span><br><span class="col-name">genre_역사</span><br><span class="col-name">genre_전쟁</span></td>
+      <td>float (0~1)</td>
+      <td>해당 장르 시청 비율. 전체 고유 시청 영화 수 대비 해당 장르 영화 수</td>
+      <td><span class="tag tag-new">파생</span> (USER_ID, MOVIE_ID) 중복 제거 후 장르별 등장 횟수 ÷ 고유 영화 수. DB: integrated_analysis_통합본.db</td>
+    </tr>
+  </table>
+  <p class="note">⚠️ genre_*_x / genre_*_y 컬럼은 merge 시 pandas 자동 생성된 중복 컬럼 (r=1.0) → 제거됨</p>
+</div>
+
+<p style="text-align:center; font-size:12px; color:#a0aec0; margin-top:8px;">SKAX 이탈예측 프로젝트 · features.csv 기준</p>
+
+</body>
+</html>

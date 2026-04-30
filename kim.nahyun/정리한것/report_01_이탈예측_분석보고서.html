@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>SKAX 이탈 예측 분석 보고서</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;background:#f4f6f9;color:#2d3748}
+.hdr{background:linear-gradient(135deg,#1a365d,#2b6cb0);color:white;padding:40px 48px}
+.hdr h1{font-size:28px;font-weight:700;margin-bottom:8px}
+.hdr p{font-size:14px;opacity:.85}
+.wrap{max-width:1100px;margin:32px auto;padding:0 24px}
+.sec{margin-bottom:36px}
+.stitle{font-size:18px;font-weight:700;color:#1a365d;border-left:4px solid #2b6cb0;padding-left:12px;margin-bottom:18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
+.card{background:white;border-radius:10px;padding:20px 24px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.kpi{text-align:center}
+.kpi .lbl{font-size:12px;color:#718096;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.kpi .val{font-size:32px;font-weight:700;color:#2b6cb0}
+.kpi .sub{font-size:13px;color:#a0aec0;margin-top:4px}
+.red .val{color:#e53e3e}
+.green .val{color:#38a169}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{background:#ebf4ff;color:#1a365d;padding:10px 14px;text-align:left;font-weight:600}
+td{padding:9px 14px;border-bottom:1px solid #e2e8f0}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#f7fafc}
+.b{display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600}
+.bb{background:#ebf4ff;color:#2b6cb0}
+.br{background:#fff5f5;color:#e53e3e}
+.bg{background:#f0fff4;color:#38a169}
+.bx{background:#f7fafc;color:#718096}
+.box{background:#fffbeb;border:1px solid #f6ad55;border-radius:8px;padding:14px 18px;font-size:14px;line-height:1.7;margin-top:16px}
+.ins{list-style:none}
+.ins li{padding:8px 0;border-bottom:1px solid #e2e8f0;font-size:14px;line-height:1.6}
+.ins li:last-child{border-bottom:none}
+.ins li::before{content:"→ ";color:#2b6cb0;font-weight:700}
+.sp{display:inline-block;background:#2b6cb0;color:white;border-radius:50%;width:22px;height:22px;text-align:center;line-height:22px;font-size:12px;font-weight:700;margin-right:6px}
+.bar-bg{background:#e2e8f0;border-radius:4px;height:12px;margin:8px 0}
+.bar-fill{height:12px;border-radius:4px}
+.ft{text-align:center;padding:24px;color:#a0aec0;font-size:13px}
+.substitle{font-size:14px;font-weight:700;color:#2b6cb0;margin:20px 0 12px;padding-left:8px;border-left:3px solid #90cdf4}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>SKAX OTT 이탈 예측 분석 보고서</h1>
+  <p>데이터 전처리 &amp; 피처 엔지니어링 결과 요약 &nbsp;|&nbsp; 분석 대상: Membership / View_History / User_Mapping / Movie_Master</p>
+</div>
+
+<div class="wrap">
+
+<!-- Step 1 전처리 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">1</span>데이터 전처리 결과</div>
+  <div class="g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="lbl">원본 행 수</div><div class="val">18,183</div><div class="sub">Membership.csv</div></div>
+    <div class="card kpi green"><div class="lbl">전처리 후 행 수</div><div class="val">17,837</div><div class="sub">최종 분석 대상</div></div>
+    <div class="card kpi red"><div class="lbl">제거된 행</div><div class="val">346</div><div class="sub">중복 338 + 이상치 8</div></div>
+    <div class="card kpi"><div class="lbl">최종 피처 컬럼</div><div class="val">31</div><div class="sub">features.csv</div></div>
+  </div>
+  <!-- 중복 처리 -->
+  <div class="substitle">1-1. 중복 데이터 처리</div>
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:14px;font-size:14px">테이블별 중복 확인 & 제거 현황</div>
+      <table>
+        <tr><th>테이블</th><th>기준 컬럼</th><th>중복 건수</th><th>처리 방법</th></tr>
+        <tr><td>Membership</td><td>user_no</td><td><span class="b br">338건</span></td><td>reg_date 최신 1건 유지</td></tr>
+        <tr><td>User_Mapping</td><td>uid</td><td><span class="b br">소수</span></td><td>USER_ID 최대값 유지</td></tr>
+        <tr><td>Movie_Master</td><td>MOVIE_ID</td><td><span class="b bg">0건</span></td><td>—</td></tr>
+        <tr><td>View_History</td><td>USER_ID / MOVIE_ID<br>/ WATCH_DAY / WATCH_SEQ</td><td><span class="b bg">0건</span></td><td>—</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:14px;font-size:14px">중복 처리 상세 전략</div>
+      <table>
+        <tr><th>케이스</th><th>내용</th></tr>
+        <tr><td>Membership 동일 user_no</td><td>동일 user_no에 여러 구독 이력 존재 → reg_date 기준 최신 1건만 유지</td></tr>
+        <tr><td>User_Mapping 동일 uid</td><td>1명이 여러 USER_ID 보유 → USER_ID 값이 가장 큰 1건 유지</td></tr>
+        <tr><td>당일 취소 (sub_days = 0)</td><td>reg_date == end_date인 케이스 존재 확인 → 이상 데이터가 아닌 정상 이탈로 처리</td></tr>
+      </table>
+      <div class="box" style="margin-top:12px">
+        <strong>처리 결과</strong><br>
+        Membership 18,183건 → 중복 338건 제거 → 17,845건<br>
+        이후 이상치 8건 추가 제거 → <strong>최종 17,837건</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- 결측치 처리 -->
+  <div class="substitle">1-2. 결측치 처리</div>
+  <div class="g2">
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:14px;font-size:14px">결측치 처리 현황 (원본 → 전처리)</div>
+      <table>
+        <tr><th>컬럼</th><th>원본 결측</th><th>전처리 후</th><th>처리 방법</th></tr>
+        <tr><td>gender</td><td>164건</td><td><span class="b bg">0건</span></td><td>NaN → 'N'</td></tr>
+        <tr><td>age</td><td>164건</td><td><span class="b bx">152건</span></td><td>미결 (모델링 전 처리)</td></tr>
+        <tr><td>is_user_verified</td><td>600건</td><td><span class="b bg">0건</span></td><td>NaN → 'N'</td></tr>
+        <tr><td>promotion_yn</td><td>8,980건</td><td><span class="b bg">0건</span></td><td>NaN → 'N'</td></tr>
+        <tr><td>is_churn_prevented</td><td>14,926건</td><td><span class="b bg">0건</span></td><td>NaN → 'N'</td></tr>
+        <tr><td>concurrent_streams</td><td>70건</td><td><span class="b bx">67건</span></td><td>==3 → NaN (미지원값)<br><small style="color:#e53e3e">* 중복 제거 시 NaN 10건 함께 제거됨 — 정상</small></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:14px;font-size:14px">주요 통계 변화</div>
+      <table>
+        <tr><th>항목</th><th>원본</th><th>전처리 후</th><th>변화</th></tr>
+        <tr><td>전체 행 수</td><td>18,183</td><td>17,837</td><td><span class="b br">-346</span></td></tr>
+        <tr><td>amount 평균</td><td>3,033원</td><td>5,053원</td><td><span class="b bb">+2,020원</span></td></tr>
+        <tr><td>age 평균</td><td>33.9세</td><td>33.8세</td><td><span class="b bx">-0.1세</span></td></tr>
+        <tr><td>sub_days 평균</td><td>30.3일</td><td>30.6일</td><td><span class="b bx">+0.3일</span></td></tr>
+      </table>
+      <div class="box">
+        <strong>amount 평균 상승 이유</strong><br>
+        원본은 iOS 달러 결제가 환율 미적용 상태.<br>
+        전처리에서 달러 × 1,100 적용 후 원화 통일 → 평균 상승
+      </div>
+    </div>
+  </div>
+
+  <!-- 이상치 처리 -->
+  <div class="substitle" style="margin-top:24px">1-3. 이상치 처리</div>
+  <div class="g2">
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:14px;font-size:14px">age 이상치 — 제거</div>
+      <table>
+        <tr><th>조건</th><th>건수</th><th>처리 방법</th></tr>
+        <tr><td>age &lt; 10 (영유아)</td><td rowspan="2"><span class="b br">8건 제거</span></td><td rowspan="2">행 삭제</td></tr>
+        <tr><td>age ≥ 100 (비현실적)</td></tr>
+        <tr><td>age 10 ~ 99 (정상 범위)</td><td><span class="b bg">유지</span></td><td>—</td></tr>
+        <tr><td>age NaN</td><td><span class="b bx">152건</span></td><td>행 유지 (모델링 단계 처리)</td></tr>
+      </table>
+      <div class="box" style="margin-top:12px">
+        <strong>처리 후 연령대 분포</strong><br>
+        20s · 30s · 40s가 주요 구간 / 70세 이상은 70+로 통합<br>
+        NaN → 'unknown' 그룹 배정 (모델 피처 포함)
+      </div>
+    </div>
+    <div class="card">
+      <div style="font-weight:600;margin-bottom:14px;font-size:14px">amount_krw 이상치 — 상한 캡핑</div>
+      <table>
+        <tr><th>조건</th><th>건수</th><th>처리 방법</th></tr>
+        <tr><td>달러 결제 (소수점 존재)</td><td>일부</td><td>× 1,100 원화 환산</td></tr>
+        <tr><td>amount_krw ≥ 20,000원</td><td><span class="b br">소수</span></td><td>19,349원으로 상한 대체 (캡핑)</td></tr>
+        <tr><td>정상 범위 (0 ~ 19,349원)</td><td><span class="b bg">유지</span></td><td>—</td></tr>
+      </table>
+      <div class="box" style="margin-top:12px">
+        <strong>캡핑 기준: 19,349원</strong><br>
+        Q75 초과 + 20,000원 이상 구간을 상세 확인한 결과<br>
+        실재하는 최고가 상품(19,349원)으로 이상치 대체<br>
+        → 행 삭제 없이 정보 보존, 평균 왜곡 최소화
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 타깃 변수 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">2</span>피처 엔지니어링 — 타깃 변수 (is_churn)</div>
+  <div class="g2" style="margin-bottom:16px">
+    <div class="card kpi green"><div class="lbl">재구매 (is_churn = 0)</div><div class="val">11,840명</div><div class="sub">전체의 66.4%</div></div>
+    <div class="card kpi red"><div class="lbl">이탈 (is_churn = 1)</div><div class="val">5,997명</div><div class="sub">전체의 33.6%</div></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px">
+      <span style="color:#38a169;font-weight:600">재구매 66.4%</span>
+      <span style="color:#e53e3e;font-weight:600">이탈 33.6%</span>
+    </div>
+    <div class="bar-bg"><div class="bar-fill" style="width:66.4%;background:linear-gradient(90deg,#38a169,#68d391)"></div></div>
+    <div style="font-size:13px;color:#718096;margin-top:8px">
+      이탈률 33.6% — 클래스 불균형 있으나 치명적 수준 아님. class_weight 또는 SMOTE 선택적 적용 가능
+    </div>
+  </div>
+</div>
+
+<!-- 시청 행동 피처 -->
+<div class="sec">
+  <div class="stitle"><span class="sp">2</span>피처 엔지니어링 — 시청 행동 피처</div>
+  <div class="g4" style="margin-bottom:16px">
+    <div class="card kpi"><div class="lbl">시청 기록 보유 유저</div><div class="val">14,892</div><div class="sub">전체의 83.5%</div></div>
+    <div class="card kpi"><div class="lbl">평균 시청 횟수</div><div class="val">7.1회</div><div class="sub">중앙값 6회</div></div>
+    <div class="card kpi"><div class="lbl">평균 완주율</div><div class="val">30%</div><div class="sub">30% 시청 후 종료</div></div>
+    <div class="card kpi red"><div class="lbl">시청 기록 없는 유저</div><div class="val">2,945</div><div class="sub">전체의 16.5%</div></div>
+  </div>
+  <div class="card">
+    <div style="font-weight:600;margin-bottom:14px;font-size:14px">생성된 시청 행동 피처 6개</div>
+    <table>
+      <tr><th>피처명</th><th>설명</th><th>통계</th></tr>
+      <tr><td>watch_count</td><td>총 시청 횟수</td><td>평균 7.1회, 최대 75회</td></tr>
+      <tr><td>unique_movies</td><td>시청한 고유 영화 수</td><td>평균 5.1편, 최대 67편</td></tr>
+      <tr><td>active_days</td><td>시청한 고유 날짜 수</td><td>평균 3.9일, 최대 21일</td></tr>
+      <tr><td>total_duration</td><td>총 시청 시간(분)</td><td>—</td></tr>
+      <tr><td>avg_duration</td><td>회당 평균 시청 시간(분)</td><td>—</td></tr>
+      <tr><td>avg_completion</td><td>평균 완주율 (0~1)</td><td>영화별 최대 DURATION 기준 프록시</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- cold_start -->
+<div class="sec">
+  <div class="stitle"><span class="sp">2</span>피처 엔지니어링 — 가입 직후 행동 (cold_start)</div>
+  <div class="g3">
+    <div class="card kpi green"><div class="lbl">7일 내 첫 시청 (1)</div><div class="val">10,643명</div><div class="sub">59.7%</div></div>
+    <div class="card kpi"><div class="lbl">7일 초과 또는 미시청 (0)</div><div class="val">7,194명</div><div class="sub">40.3%</div></div>
+    <div class="card kpi"><div class="lbl">첫 시청까지 평균</div><div class="val">5.4일</div><div class="sub">가입 후 첫 콘텐츠까지</div></div>
+  </div>
+</div>
+
+<!-- RFM -->
+<div class="sec">
+  <div class="stitle"><span class="sp">2</span>피처 엔지니어링 — RFM 이탈/재구매 비교</div>
+  <div class="card">
+    <table>
+      <tr><th>구분</th><th>R — sub_days (중앙값)</th><th>F — watch_count (중앙값)</th><th>M — amount_krw (중앙값)</th><th>watch_per_day (중앙값)</th></tr>
+      <tr>
+        <td><span class="b bg">재구매 (0)</span></td>
+        <td>31일</td>
+        <td>4회</td>
+        <td style="font-weight:700;color:#2b6cb0">7,900원</td>
+        <td>0.13</td>
+      </tr>
+      <tr>
+        <td><span class="b br">이탈 (1)</span></td>
+        <td>31일</td>
+        <td>5회</td>
+        <td style="font-weight:700;color:#e53e3e">100원</td>
+        <td>0.16</td>
+      </tr>
+    </table>
+  </div>
+  <div class="box">
+    <strong>핵심 인사이트</strong><br>
+    sub_days(구독 기간)는 이탈/재구매 모두 중앙값 31일로 동일 → 구독 기간 자체는 이탈 구분력 낮음<br>
+    <strong>amount_krw 차이가 압도적</strong> — 재구매 7,900원 vs 이탈 100원 → 저가/무료 체험 플랜 유저가 이탈에 집중됨<br>
+    watch_count는 이탈 그룹이 소폭 높음 → 단순 시청 횟수보다 결제 금액이 더 강한 이탈 예측 변수일 가능성
+  </div>
+</div>
+
+<!-- 잔여 결측치 -->
+<div class="sec">
+  <div class="stitle">모델링 전 처리 필요 항목</div>
+  <div class="card">
+    <table>
+      <tr><th>컬럼</th><th>결측 건수</th><th>비고</th></tr>
+      <tr><td>repurchase</td><td>5,997건</td><td>is_churn=1 이탈 유저 — 타깃 변수 변환 완료, 원본 컬럼 유지</td></tr>
+      <tr><td>age</td><td>152건</td><td>미결 — 평균/중앙값 대체 또는 모델 내 NaN 허용 검토</td></tr>
+      <tr><td>concurrent_streams</td><td>67건</td><td>미결 — 최빈값 대체 또는 모델 내 NaN 허용 검토</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 다음 단계 -->
+<div class="sec">
+  <div class="stitle">다음 단계 — Step 3. 모델링</div>
+  <div class="card">
+    <ul class="ins">
+      <li>age / concurrent_streams 결측치 처리 방법 확정</li>
+      <li>범주형 변수 인코딩 — gender, age_group, payment_device, product_cd 등</li>
+      <li>학습/검증 데이터 분리 (train 80% / test 20%)</li>
+      <li>모델 비교 — 랜덤포레스트, XGBoost, LightGBM</li>
+      <li>클래스 불균형 처리 — class_weight 또는 SMOTE 적용 검토</li>
+      <li>피처 중요도 확인 후 불필요 컬럼 제거</li>
+    </ul>
+  </div>
+</div>
+
+</div>
+<div class="ft">SKAX OTT 이탈 예측 분석 | 데이터 기간 2021.03</div>
+</body>
+</html>
