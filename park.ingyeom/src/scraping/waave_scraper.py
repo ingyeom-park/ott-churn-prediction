@@ -5,15 +5,19 @@ import urllib.request
 import urllib.parse
 import csv
 import os
-import sys
+from pathlib import Path
 
 # ─────────────────────────────────────────────
 # 설정 (필요 시 수정)
 # ─────────────────────────────────────────────
-INPUT_FILE   = r"Movie_crawling(Waave)/movie_list_unique.txt"        # 제목 리스트 파일 경로
-OUTPUT_CSV   = r"Movie_crawling(Waave)/wavve_movies.csv"        # 결과 CSV 파일 경로
-NOTFOUND_TXT = r"Movie_crawling(Waave)/wavve_notfound.txt"      # 검색 0건 제목 목록
-CHECKPOINT   = r"Movie_crawling(Waave)/wavve_checkpoint.json"  # 중간 저장 파일 (재시작 시 이어서 진행)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+RAW_DATA_DIR = PROJECT_ROOT / "_data" / "01_raw"
+INTERIM_DATA_DIR = PROJECT_ROOT / "_data" / "02_interim"
+
+INPUT_FILE   = RAW_DATA_DIR / "movie_list_unique.txt"       # 제목 리스트 파일 경로
+OUTPUT_CSV   = INTERIM_DATA_DIR / "wavve_movies.csv"        # 결과 CSV 파일 경로
+NOTFOUND_TXT = INTERIM_DATA_DIR / "wavve_notfound.txt"      # 검색 0건 제목 목록
+CHECKPOINT   = INTERIM_DATA_DIR / "wavve_checkpoint.json"   # 중간 저장 파일 (재시작 시 이어서 진행)
 DELAY_MIN    = 0.6                       # 요청 간 최소 딜레이 (초)
 DELAY_MAX    = 1.3                       # 요청 간 최대 딜레이 (초)
 MAX_RESULTS  = 20                        # 제목 하나당 최대 검색 결과 수

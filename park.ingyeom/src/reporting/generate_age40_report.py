@@ -12,6 +12,12 @@ import matplotlib.ticker as mticker
 import seaborn as sns
 import base64
 import io
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+RAW_DATA_DIR = PROJECT_ROOT / "_data" / "01_raw"
+REPORTS_DIR = PROJECT_ROOT / "reports"
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── 폰트 / 스타일 설정 ────────────────────────────────────────────────────────
 plt.rcParams['font.family']       = 'Malgun Gothic'
@@ -34,7 +40,7 @@ PALETTE = {
 }
 
 # ── 데이터 로드 ──────────────────────────────────────────────────────────────
-df = pd.read_excel('../Dataset/Membership.xlsx')
+df = pd.read_excel(RAW_DATA_DIR / 'Membership.xlsx')
 df['verified_label'] = df['is_user_verified'].fillna('NaN')
 df['is_ios']         = df['billing_method'] == 140
 
@@ -751,7 +757,7 @@ HTML = f"""<!DOCTYPE html>
 </body>
 </html>"""
 
-output_path = '../EDA_outputs/age40_analysis_report.html'
+output_path = REPORTS_DIR / 'age40_analysis_report.html'
 with open(output_path, 'w', encoding='utf-8') as f:
     f.write(HTML)
 
