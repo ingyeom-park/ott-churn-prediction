@@ -1,4 +1,4 @@
-﻿USER_NUM,MOVIE_NUM,watch_time(min),watch_day,watch_seq
+USER_NUM,MOVIE_NUM,watch_time(min),watch_day,watch_seq
 0,4243,1,20210314,1
 0,4243,111,20210314,2
 0,1860,101,20210319,1
